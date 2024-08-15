@@ -4,11 +4,11 @@ from django.utils.translation import gettext as _
 
 class CustomUserManager(UserManager):
 
-    def __create_user(self, email, password, **extra_field):
+    def _create_user(self, email, password, **extra_field):
         if not email:
             raise ValueError("The given email must be set")
         email = self.normalize_email(email=email)
-        user = self.model(email, password, **extra_field)
+        user = self.model(email=email, **extra_field)
         user.set_password(password)
         user.save(using=self._db)
         return user
@@ -30,9 +30,14 @@ class CustomUserManager(UserManager):
 class User(AbstractUser):
 
     email = models.EmailField(_("Email"), unique=True, max_length=50, blank=True)
+    username = models.CharField(_("Username"), unique=True, max_length = 50, blank=True)
+    phone = models.CharField(_("phone"), max_length = 20, null = True, blank=True)
     is_verified = models.BooleanField(_("Is_Verifield"), default=False)
     objects = CustomUserManager()
     EMAIL_FIELD = "email"
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["username"]
+
 
     def _str_(self):
         return self.get_full_name() or self.email
