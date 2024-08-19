@@ -9,4 +9,5 @@ router.register("sign-up", views.SignUpUserAPI, basename="sign-up")
 
 urlpatterns = [
     path("", include(router.urls)),
+    path('login', views.LonginUserApi.as_view(), name='login'),
 ]
