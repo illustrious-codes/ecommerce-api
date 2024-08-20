@@ -31,6 +31,7 @@ schema_view = get_schema_view(
 
 api_routes = [
     path("auth/", include("authentication.urls", namespace="auth")),
+    path("product/", include('products.urls', namespace="product")),
     path("", schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"),
     path("redoc/", schema_view.with_ui("redoc", cache_timeout=0), name="swagger-redoc")
 ]

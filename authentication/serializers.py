@@ -97,27 +97,27 @@ class LoginUserSerializer(serializers.Serializer):
             return data
         
 
-        def validate(self, data):
-            email = data.get('email', '')
-            password = data.get('password', '')
+        # def validate(self, data):
+        #     email = data.get('email', '')
+        #     password = data.get('password', '')
 
-            user = User.objects.filter(email__iexact=email).first()
+        #     user = User.objects.filter(email__iexact=email).first()
 
-            if not user:
-                raise serializers.ValidationError("Invalid email or password")
+        #     if not user:
+        #         raise serializers.ValidationError("Invalid email or password")
 
-            if not user.check_password(password):
-                raise serializers.ValidationError("Invalid email or password")
+        #     if not user.check_password(password):
+        #         raise serializers.ValidationError("Invalid email or password")
 
-            user = authenticate(username=user.username, password=password)
+        #     user = authenticate(username=user.username, password=password)
 
-            if not user:
-                raise serializers.ValidationError("Authentication failed")
+        #     if not user:
+        #         raise serializers.ValidationError("Authentication failed")
 
-            token, _ = Token.objects.get_or_create(user=user)
+        #     token, _ = Token.objects.get_or_create(user=user)
 
-            return {
-                'token': token.key,
-                'user_id': user.id,
-                'email': user.email
-            }
+        #     return {
+        #         'token': token.key,
+        #         'user_id': user.id,
+        #         'email': user.email
+        #     }

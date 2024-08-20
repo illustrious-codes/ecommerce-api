@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'drf_yasg',
     #Custume App
     'authentication',
+    'products',
 ]
 
 MIDDLEWARE = [
