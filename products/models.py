@@ -18,9 +18,10 @@ CATEGORY_CHOICES = [
 ]
 
 class Product(models.Model):
-    user = models.ForeignKey(User, verbose_name=_("User"), null=True, blank=True, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, verbose_name=_("User"),  on_delete=models.CASCADE )
     name = models.CharField(_('Name'), max_length=100, null=True, blank=True)
     price = models.DecimalField(_('Price'), max_digits=10, decimal_places=2, null=True, blank=True)
+    stock = models.IntegerField(_('stock'), default=1)
     category = models.CharField(_('Category'), choices=CATEGORY_CHOICES, null=True, blank=True)
     description = models.TextField(_('Description'), null=True, blank=True)
     image = models.ImageField(upload_to='product-image/')
