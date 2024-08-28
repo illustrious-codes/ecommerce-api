@@ -1,12 +1,17 @@
+from django.shortcuts import get_object_or_404
 from rest_framework.generics import views
-from .serializers import SignUpUserSerializer, LoginUserSerializer
-from rest_framework import status, mixins, viewsets, generics
+from yaml import serialize
+
+from utils.utility import send_otp
+from .serializers import SignUpUserSerializer, LoginUserSerializer, verifyOTPSerializer
+from rest_framework import status, mixins, viewsets, generics, decorators
 from rest_framework.response import Response
 from.models import User
 from rest_framework.permissions import AllowAny
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.parsers import MultiPartParser, FormParser
+from django.shortcuts import get_object_or_404
 
 
 class SignUpUserAPI(
@@ -48,9 +53,33 @@ class LonginUserApi(views.APIView):
         }
         return Response(data)
 
-# class LoginUserApi(APIView):
-#     def post(self, request):
-#         serializer = LoginUserSerializer(data=request.data)
-#         if serializer.is_valid():
-#             return Response(serializer.validated_data, status=status.HTTP_200_OK)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class AuthenticationViewSet(viewsets.GenericViewSet):
+    queryset = User.objects.all()
+    serializer_class = None
+    permission_classes = [AllowAny]
+
+    def get_serializer_class(self):
+        if self.action == 'verify_otp':
+            return verifyOTPSerializer
+        return super().get_serializer_class()
+    
+    @decorators.action(methods=['post'], detail=False, url_path='verify_otp')
+    def verify_otp(self, request):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid(raise_exception=False):
+            serializer.save()
+            return Response({"message": "Your account have been verified"})
+        return Response(serializer.error)
+    
+    @decorators.action(methods=["post"], detail=False, url_path="get_otp")
+    def get_otp(self, request):
+        _= request.data.get("type")
+        email = request.data.get("email")
+        user = get_object_or_404(User, email__iexact=email)
+
+        if user.is_verified:
+            return Response({"message": "Your account has already been verifield"})
+        type_ = _.replace("_", " ")
+
+        send_otp(user, email, type_)
+        return Response({"message": "OTP has been sent to your email"})

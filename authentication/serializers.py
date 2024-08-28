@@ -1,13 +1,16 @@
 from dataclasses import fields
 import email
 from os import read
-from rest_framework import serializers
+from pkg_resources import require
+from rest_framework import serializers, generics
 from rest_framework.response import Response
 from django.contrib.auth.password_validation import validate_password
 from .models import User
 from rest_framework.authtoken.models import Token
 from django.core import exceptions
 from django.contrib.auth import authenticate
+from utils.utility import send_otp
+from django.shortcuts import get_object_or_404
 
 class SignUpUserSerializer(serializers.ModelSerializer):
     token = serializers.CharField(read_only=True)
@@ -56,6 +59,7 @@ class SignUpUserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data.pop("confirm_password")
         user = User.objects.create_user(**validated_data)
+        send_otp(user, validated_data.get('email'), 'Email verification')
         token, _ = Token.objects.get_or_create(user=user)
         self.token = token.key
         return user
@@ -96,28 +100,21 @@ class LoginUserSerializer(serializers.Serializer):
             data['user'] = user
             return data
         
+class verifyOTPSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+    otp = serializers.CharField(required=True)
 
-        # def validate(self, data):
-        #     email = data.get('email', '')
-        #     password = data.get('password', '')
+    # def valifate(self, data):
+    #     email = data.get("email")
+    #     otp = data.get("otp")
 
-        #     user = User.objects.filter(email__iexact=email).first()
+    #     user = generics.get_object_or_404(User, email__iexact=email)
 
-        #     if not user:
-        #         raise serializers.ValidationError("Invalid email or password")
+    def save(self, **kwargs):
+        email = self.validated_data.get("email")
+        user = generics.get_object_or_404(User, email__iexact=email)
 
-        #     if not user.check_password(password):
-        #         raise serializers.ValidationError("Invalid email or password")
-
-        #     user = authenticate(username=user.username, password=password)
-
-        #     if not user:
-        #         raise serializers.ValidationError("Authentication failed")
-
-        #     token, _ = Token.objects.get_or_create(user=user)
-
-        #     return {
-        #         'token': token.key,
-        #         'user_id': user.id,
-        #         'email': user.email
-        #     }
+        if not user.is_verified:
+            user.is_verified = True
+            user.save()
+        return user
