@@ -5,9 +5,10 @@ import string
 from django.dispatch import receiver
 from notifications.email import Email
 
-def message(subject: str, extra: str) -> str:
+def message(subject: str, extra: dict) -> str:
     if subject.lower() == "email verification":
-        message = f"Your email verification is {extra}"
+        otp_code = extra.get('otp_code', '')
+        message = f"Your email verification is {otp_code}"
         email_template = "email/email_verification.html"
     else: 
         email_template = ""
@@ -32,7 +33,7 @@ def send_email(email: str, subject: str, extra: dict = None):
     Email(
         subject=subject,
         receiver=email,
-        plain_message=f"{message_}",
+        plain_message=message_,
         template=template_,
         data=data
     ).send()
