@@ -13,6 +13,15 @@ DATABASES = {
     }
 }
 
+DATABASES = {
+    'default': {
+        dj_database_url.config(
+            default=config('DATABASE_URL')
+        )
+    }
+}
+
+
 EMAIL_BACKEND = config('EMAIL_BACKEND')
 EMAIL_HOST = config('EMAIL_HOST')
 EMAIL_PORT = config('EMAIL_PORT')
