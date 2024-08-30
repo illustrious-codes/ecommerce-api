@@ -162,7 +162,7 @@ STATICFILES_DIRS= [
 ]
 
 # Media Files (User uploaded files)
-STATIC_ROOT = os.path.join(BASE_DIR, 'static_root')
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles_build", 'static')
 
 
 # Media Files (User uploaded files)
