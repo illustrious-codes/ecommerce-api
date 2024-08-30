@@ -2,8 +2,9 @@ from django.shortcuts import get_object_or_404
 from rest_framework.generics import views
 from yaml import serialize
 
+from order import serializers
 from utils.utility import send_otp
-from .serializers import SignUpUserSerializer, LoginUserSerializer, verifyOTPSerializer
+from .serializers import ForgetPasswordSerializer, SignUpUserSerializer, LoginUserSerializer, verifyOTPSerializer, ResetPasswordSerializer
 from rest_framework import status, mixins, viewsets, generics, decorators
 from rest_framework.response import Response
 from.models import User
@@ -61,9 +62,13 @@ class AuthenticationViewSet(viewsets.GenericViewSet):
     def get_serializer_class(self):
         if self.action == 'verify_otp':
             return verifyOTPSerializer
+        elif self.action == "forget_password":
+            return ForgetPasswordSerializer
+        elif self.action == "reset_password":
+            return ResetPasswordSerializer
         return super().get_serializer_class()
     
-    @decorators.action(methods=['post'], detail=False, url_path='verify_otp')
+    @decorators.action(methods=['post'], detail=False, url_path='verify-otp')
     def verify_otp(self, request):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid(raise_exception=False):
@@ -71,7 +76,7 @@ class AuthenticationViewSet(viewsets.GenericViewSet):
             return Response({"message": "Your account have been verified"})
         return Response(serializer.error)
     
-    @decorators.action(methods=["post"], detail=False, url_path="get_otp")
+    @decorators.action(methods=["post"], detail=False, url_path="get-otp")
     def get_otp(self, request):
         _= request.data.get("type")
         email = request.data.get("email")
@@ -83,3 +88,19 @@ class AuthenticationViewSet(viewsets.GenericViewSet):
 
         send_otp(user, email, type_)
         return Response({"message": "OTP has been sent to your email"})
+    
+    @decorators.action(methods=["post"], detail=False, url_path="forget-password")
+    def forget_password(self, request):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response({"message": "otp sent to your mail"})
+        return Response({"message": serializer.error})
+    
+    @decorators.action(methods=["post"], detail=False, url_path="reset-password")
+    def reset_password(self, request):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response({'message': 'Your password has been reset'})
+        return Response({'message': serializer.error})
