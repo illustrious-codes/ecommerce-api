@@ -22,7 +22,7 @@ class Product(models.Model):
     name = models.CharField(_('Name'), max_length=100, null=True, blank=True)
     price = models.DecimalField(_('Price'), max_digits=10, decimal_places=2, null=True, blank=True)
     stock = models.IntegerField(_('stock'), default=1)
-    category = models.CharField(_('Category'), choices=CATEGORY_CHOICES, null=True, blank=True)
+    category = models.CharField(_('Category'), max_length=50, choices=CATEGORY_CHOICES, null=True, blank=True)
     description = models.TextField(_('Description'), null=True, blank=True)
     image = models.ImageField(upload_to='product-image/')
     created_at = models.DateTimeField(auto_now_add=True, null=True)
